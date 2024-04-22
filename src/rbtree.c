@@ -26,7 +26,7 @@ rbtree *new_rbtree(void) {
       y.l   y.r
 
 */
-void left_rotation(rbtree *t, node_t *p) {
+void left_rotation(rbtree *t, node_t *x) {
   node_t *y = x -> right;
 
   // y의 왼쪽 서브 트리를 x의 오른쪽 서브 트리로 옮기기
@@ -67,10 +67,16 @@ void left_rotation(rbtree *t, node_t *p) {
    x.l x.r  
 
 */
-void right_rotation(rbtree *t, node_t *p) {
-  node_t *y = x -> right;
+void right_rotation(rbtree *t, node_t *y) {
+  node_t *x = y -> left;
 
-  // y의 왼쪽 서브 트리를 x의 오른쪽 서브 트리로 옮기기
+  // x의 오른쪽 서브 트리를 y의 왼쪽 서브 트리로 옮기기
+  y -> left = x -> right;
+
+  if (x -> right != t -> nil) {
+    x-> right -> parent = y;
+  }
+
   x -> right = y -> left;
 
   if (y -> left != t -> nil) {
@@ -93,7 +99,7 @@ void right_rotation(rbtree *t, node_t *p) {
   }
 
   // y를 x의 오른쪽으로 두기
-  x -> left = y;
+  x -> right = y;
   y -> parent = x;
 }
 
