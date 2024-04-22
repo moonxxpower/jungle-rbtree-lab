@@ -56,7 +56,46 @@ void left_rotation(rbtree *t, node_t *p) {
   x -> parent = y;
 }
 
-// void right_rotation(rbtree *t, node_t *p)
+// 우회전
+/*
+
+          |
+          y
+        /   \
+      x     y.r
+     / \
+   x.l x.r  
+
+*/
+void right_rotation(rbtree *t, node_t *p) {
+  node_t *y = x -> right;
+
+  // y의 왼쪽 서브 트리를 x의 오른쪽 서브 트리로 옮기기
+  x -> right = y -> left;
+
+  if (y -> left != t -> nil) {
+    x -> right -> parent = y;
+  }
+
+  // y의 부모를 x에 연결하기
+  x -> parent = y -> parent;
+
+  if (y -> parent == t -> nil) {
+    x -> parent = t -> root
+  }
+
+  elif (y == y -> parent -> left) {
+    y -> parent -> left = x;
+  }
+
+  else {
+    y -> parent -> right = x;
+  }
+
+  // y를 x의 오른쪽으로 두기
+  x -> left = y;
+  y -> parent = x;
+}
 
 void delete_rbtree(rbtree *t) {
   // TODO: reclaim the tree nodes's memory
