@@ -77,12 +77,6 @@ void right_rotation(rbtree *t, node_t *y) {
     x-> right -> parent = y;
   }
 
-  x -> right = y -> left;
-
-  if (y -> left != t -> nil) {
-    x -> right -> parent = y;
-  }
-
   // y의 부모를 x에 연결하기
   x -> parent = y -> parent;
 
@@ -108,9 +102,41 @@ void delete_rbtree(rbtree *t) {
   free(t);
 }
 
+// key의 값을 가진 새로운 노드 삽입
 node_t *rbtree_insert(rbtree *t, const key_t key) {
-  // TODO: implement insert
-  return t->root;
+  // 새로운 노드 생성
+  node_t *new = (node_t *)calloc(1, sizeof(node_t));
+  node_t *current = t -> root;
+
+  // 새 노드를 삽입할 위치 탐색
+  while (current != t -> nil) {
+
+    // 왼쪽 노드에 삽입
+    if (p -> key < current -> key) {
+      current -> left = new;
+    }
+
+    // 오른쪽 노드에 삽입
+    else {
+      current -> right = new;
+    }
+  }
+
+  // 새 노드의 부모 지정
+  new -> parent = current;
+
+  // root가 nil일 경우, 새 노드를 트리의 루트로 지정
+  if (current == t -> nil) {
+    t -> root = new;
+  }
+
+  new -> left = t -> nil;
+  new -> right = t -> nil;
+  new -> color = RBTREE_RED;  // 삽입된 노드는 무조건 red
+
+  rbtree_insert_fixup(t, new);
+
+  return new;
 }
 
 // rbtree_insert_fixup(rbtree *t, node_t *p)
