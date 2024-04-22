@@ -40,10 +40,10 @@ void left_rotation(rbtree *t, node_t *x) {
   y -> parent = x -> parent;
 
   if (x -> parent == t -> nil) {
-    y -> parent = t -> root
+    y -> parent = t -> root;
   }
 
-  elif (x == x -> parent -> left) {
+  else if (x == x -> parent -> left) {
     x -> parent -> left = y;
   }
 
@@ -81,10 +81,10 @@ void right_rotation(rbtree *t, node_t *y) {
   x -> parent = y -> parent;
 
   if (y -> parent == t -> nil) {
-    x -> parent = t -> root
+    x -> parent = t -> root;
   }
 
-  elif (y == y -> parent -> left) {
+  else if (y == y -> parent -> left) {
     y -> parent -> left = x;
   }
 
@@ -112,7 +112,7 @@ node_t *rbtree_insert(rbtree *t, const key_t key) {
   while (current != t -> nil) {
 
     // 왼쪽 노드에 삽입
-    if (p -> key < current -> key) {
+    if (new -> key < current -> key) {
       current -> left = new;
     }
 
@@ -161,7 +161,7 @@ int rbtree_erase(rbtree *t, node_t *p) {
   return 0;
 }
 
-// rbtree_delte_fixup(rbtree *t, node_t *p)
+// rbtree_erase_fixup(rbtree *t, node_t *p)
 
 int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
   // TODO: implement to_array
