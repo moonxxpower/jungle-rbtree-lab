@@ -40,7 +40,7 @@ void left_rotation(rbtree *t, node_t *x) {
   y -> parent = x -> parent;
 
   if (x -> parent == t -> nil) {
-    y -> parent = t -> root;
+    t -> root = y;
   }
 
   else if (x == x -> parent -> left) {
@@ -81,7 +81,7 @@ void right_rotation(rbtree *t, node_t *y) {
   x -> parent = y -> parent;
 
   if (y -> parent == t -> nil) {
-    x -> parent = t -> root;
+    t -> root = x;
   }
 
   else if (y == y -> parent -> left) {
@@ -106,40 +106,104 @@ void delete_rbtree(rbtree *t) {
 node_t *rbtree_insert(rbtree *t, const key_t key) {
   // 새로운 노드 생성
   node_t *new = (node_t *)calloc(1, sizeof(node_t));
-  node_t *current = t -> root;
+  node_t *p = t -> nil;
+  node_t *c = t -> root;
 
-  // 새 노드를 삽입할 위치 탐색
-  while (current != t -> nil) {
-
-    // 왼쪽 노드에 삽입
-    if (new -> key < current -> key) {
-      current -> left = new;
+  // 새 노드를 삽입할 위치를 탐색
+  while (c != t -> nil) {
+    p = c;
+    if (key < c -> key) {
+      c = c -> left;
     }
-
-    // 오른쪽 노드에 삽입
     else {
-      current -> right = new;
+      c = c -> right;
     }
   }
 
-  // 새 노드의 부모 지정
-  new -> parent = current;
+  // 새 노드의 부모 설정
+  new -> parent = p;
 
   // root가 nil일 경우, 새 노드를 트리의 루트로 지정
-  if (current == t -> nil) {
+  if (p == t -> nil) {
     t -> root = new;
   }
 
+  // 부모의 자식 설정
+  else if (key < p -> key) {
+    p -> left = new;
+  }
+  
+  else {
+    p -> right = new;
+  }
+  
+  new -> key = key;
   new -> left = t -> nil;
   new -> right = t -> nil;
-  new -> color = RBTREE_RED;  // 삽입된 노드는 무조건 red
+  new -> color = RBTREE_RED;
 
   rbtree_insert_fixup(t, new);
 
   return new;
 }
 
-// rbtree_insert_fixup(rbtree *t, node_t *p)
+// 삽입 후, RB Tree 속성을 만족하지 않은 부분 재조정
+void rbtree_insert_fixup(rbtree *t, node_t *new) {
+  // 두개의 red 노드가 연속으로 왔을 때
+  while (new -> parent -> color == RBTREE_RED) {
+    if (new -> parent == new -> parent -> parent -> left) {
+      node_t *uncle = new -> parent -> parent -> right;
+
+      // 삼촌이 red일 경우 -> 색깔 변경
+      if (uncle -> color == RBTREE_RED) {
+        new -> parent -> color = RBTREE_BLACK;
+        uncle -> color = RBTREE_BLACK;
+        new -> parent -> parent -> color = RBTREE_RED;
+        new = new -> parent -> parent;
+      }
+
+      // 삼촌이 black일 경우 -> 회전 (위치에 따라 방향 차이 존재)
+      else {
+        if (new == new -> parent -> right) {
+          // 만약 꺾여 있는 경우, 회전하여 펴주기
+          new = new -> parent;
+          left_rotation(t, new);
+      }
+
+        new -> parent -> color = RBTREE_BLACK;
+        new -> parent -> parent -> color = RBTREE_RED;
+        right_rotation(t, new);
+      }
+
+    } else {
+      node_t *uncle = new -> parent -> parent -> left;
+
+      // 삼촌이 red일 경우 -> 색깔 변경
+      if (uncle -> color == RBTREE_RED) {
+        new -> parent -> color = RBTREE_BLACK;
+        uncle -> color = RBTREE_BLACK;
+        new -> parent -> parent -> color = RBTREE_RED;
+        new = new -> parent -> parent;
+      }
+
+      // 삼촌이 black일 경우 -> 회전 (위치에 따라 방향 차이 존재)
+      else {
+        if (new == new -> parent -> left) {
+          // 만약 꺾여 있는 경우, 회전하여 펴주기
+          new = new -> parent;
+          right_rotation(t, new);
+        }
+
+        new -> parent -> color = RBTREE_BLACK;
+        new -> parent -> parent -> color = RBTREE_RED;
+        left_rotation(t, new);
+      }
+    }
+  }
+
+  // 루트 노드는 항상 black
+  t -> root -> color = RBTREE_BLACK;
+}
 
 node_t *rbtree_find(const rbtree *t, const key_t key) {
   // TODO: implement find
@@ -167,3 +231,4 @@ int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
   // TODO: implement to_array
   return 0;
 }
+
