@@ -3,14 +3,15 @@
 #include <stdlib.h>
 
 // 새로운 RB Tree 생성
-rbtree *new_rbtree(void) {
-  rbtree *t = (rbtree *)calloc(1, sizeof(rbtree));
+rbtree * new_rbtree(void) {
+  rbtree * t = (rbtree *)calloc(1, sizeof(rbtree));
   
-  node_t *nil = (node_t *)calloc(1, sizeof(node_t));
+  node_t * nil = (node_t *)calloc(1, sizeof(node_t));
   nil -> color = RBTREE_BLACK;  // nil 노드는 항상 black
 
   // 초기값 설정
-  t -> nil = t -> root = nil;
+  t -> nil = nil;
+  t -> root = nil;
 
   return t;
 }
@@ -26,8 +27,8 @@ rbtree *new_rbtree(void) {
       y.l   y.r
 
 */
-void left_rotation(rbtree *t, node_t *x) {
-  node_t *y = x -> right;
+void left_rotation(rbtree * t, node_t * x) {
+  node_t * y = x -> right;
 
   // y의 왼쪽 서브 트리를 x의 오른쪽 서브 트리로 옮기기
   x -> right = y -> left;
@@ -67,8 +68,8 @@ void left_rotation(rbtree *t, node_t *x) {
    x.l x.r  
 
 */
-void right_rotation(rbtree *t, node_t *y) {
-  node_t *x = y -> left;
+void right_rotation(rbtree * t, node_t * y) {
+  node_t * x = y -> left;
 
   // x의 오른쪽 서브 트리를 y의 왼쪽 서브 트리로 옮기기
   y -> left = x -> right;
@@ -98,7 +99,7 @@ void right_rotation(rbtree *t, node_t *y) {
 }
 
 // 후위 순회를 이용하여 해당 Tree가 사용했던 메모리 전부 반환
-void delete_node(rbtree *t, node_t *n) {
+void delete_node(rbtree * t, node_t * n) {
   if (n == t -> nil) {
     return;
   }
@@ -108,18 +109,18 @@ void delete_node(rbtree *t, node_t *n) {
   free(n);
 }
 
-void delete_rbtree(rbtree *t) {
+void delete_rbtree(rbtree * t) {
   delete_node(t, t -> root);
   free(t -> nil);
   free(t);
 }
 
 // key의 값을 가진 새로운 노드 삽입
-node_t *rbtree_insert(rbtree *t, const key_t key) {
+node_t * rbtree_insert(rbtree * t, const key_t key) {
   // 새로운 노드 생성
-  node_t *new = (node_t *)calloc(1, sizeof(node_t));
-  node_t *p = t -> nil;
-  node_t *c = t -> root;
+  node_t * new = (node_t *)calloc(1, sizeof(node_t));
+  node_t * p = t -> nil;
+  node_t * c = t -> root;
 
   // 새 노드를 삽입할 위치를 탐색
   while (c != t -> nil) {
@@ -160,11 +161,11 @@ node_t *rbtree_insert(rbtree *t, const key_t key) {
 }
 
 // 삽입 후, RB Tree 속성을 만족하지 않은 부분 재조정
-void rbtree_insert_fixup(rbtree *t, node_t *new) {
+void rbtree_insert_fixup(rbtree * t, node_t * new) {
   // 두개의 red 노드가 연속으로 왔을 때
   while (new -> parent -> color == RBTREE_RED) {
     if (new -> parent == new -> parent -> parent -> left) {
-      node_t *uncle = new -> parent -> parent -> right;
+      node_t * uncle = new -> parent -> parent -> right;
 
       // 삼촌이 red일 경우 -> 색깔 변경
       if (uncle -> color == RBTREE_RED) {
@@ -188,7 +189,7 @@ void rbtree_insert_fixup(rbtree *t, node_t *new) {
       }
 
     } else {
-      node_t *uncle = new -> parent -> parent -> left;
+      node_t * uncle = new -> parent -> parent -> left;
 
       // 삼촌이 red일 경우 -> 색깔 변경
       if (uncle -> color == RBTREE_RED) {
@@ -217,9 +218,25 @@ void rbtree_insert_fixup(rbtree *t, node_t *new) {
   t -> root -> color = RBTREE_BLACK;
 }
 
-node_t *rbtree_find(const rbtree *t, const key_t key) {
-  // TODO: implement find
-  return t->root;
+// RB Tree 내에 해당 key가 있는지 탐색
+node_t * rbtree_find(const rbtree * t, const key_t key) {
+  node_t * temp = t -> root;
+
+  while (temp != t -> nil) {
+    if (temp -> key > key) {
+      temp = temp -> left;
+    }
+
+    else if (temp -> key < key) {
+      temp = temp -> right;
+    }
+
+    else {
+      return temp;
+    }
+
+    return NULL;
+  }
 }
 
 node_t *rbtree_min(const rbtree *t) {
