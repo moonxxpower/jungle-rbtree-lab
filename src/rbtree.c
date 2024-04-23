@@ -30,6 +30,10 @@ rbtree * new_rbtree(void) {
 void left_rotation(rbtree * t, node_t * x) {
   node_t * y = x -> right;
 
+  if (y == t -> nil) {
+    return;
+  }
+
   // y의 왼쪽 서브 트리를 x의 오른쪽 서브 트리로 옮기기
   x -> right = y -> left;
 
@@ -70,6 +74,10 @@ void left_rotation(rbtree * t, node_t * x) {
 */
 void right_rotation(rbtree * t, node_t * y) {
   node_t * x = y -> left;
+
+  if (x == t -> nil) {
+    return;
+  }
 
   // x의 오른쪽 서브 트리를 y의 왼쪽 서브 트리로 옮기기
   y -> left = x -> right;
@@ -164,6 +172,10 @@ node_t * rbtree_insert(rbtree * t, const key_t key) {
 void rbtree_insert_fixup(rbtree * t, node_t * new) {
   // 두개의 red 노드가 연속으로 왔을 때
   while (new -> parent -> color == RBTREE_RED) {
+    if (new -> parent == t -> root) {
+      break;
+    }
+
     if (new -> parent == new -> parent -> parent -> left) {
       node_t * uncle = new -> parent -> parent -> right;
 
@@ -277,8 +289,74 @@ node_t * node_min(rbtree * t, node_t * n) {
   return temp;
 }
 
-int rbtree_erase(rbtree *t, node_t * n) {
+// 다른 서브 트리로 교체
+void transplant(rbtree * t, node_t * u, node_t * v) {
+  if (u -> parent == t -> nil) {
+    t -> root = v;
+  }
 
+  else if (u == u -> parent -> left) {
+    u -> parent -> left = v;
+  }
+
+  else {
+    u -> parent -> right = v;
+  }
+
+  v -> parent = u -> parent;
+}
+
+// 지정된 노드 삭제
+int rbtree_erase(rbtree * t, node_t * erase) {
+  node_t * y = erase; 
+  node_t * x;
+  color_t y_original_color = y -> color;
+
+  // 삭제된 노드를 대체할 노드 찾기
+  // 삭제될 노드의 왼쪽이 없을 때
+  if (erase -> left == t -> nil) {  
+    x = erase -> right;
+    transplant(t, erase, erase -> right);
+  }
+
+  // 삭제될 노드의 오른쪽이 없을 때
+  else if (erase -> right == t -> nil) {
+    x = erase -> left;
+    transplant(t, erase, erase -> left);
+  }
+
+  // 삭제될 노드가 자식 노드 모두를 가지고 있을 때
+  else {
+    y = node_min(t, erase -> right);
+    y_original_color = y -> color;
+    x = y -> right;
+
+    // 후임자가 삭제될 노드와 연결되도록 설정
+    if (y -> parent == erase){
+      x -> parent = y; 
+    }
+
+    else {
+      transplant(t, y, y -> right);
+      y -> right = erase -> right;
+      y -> right -> parent = y;
+    }
+
+    // 삭제될 노드를 y로 대체하기
+    transplant(t, erase, y);
+    y -> left = erase -> left;
+    y -> left -> parent = y;
+    y -> color = erase -> color;
+  }
+
+  // 실제로 삭제된 노드가 black일 경우 재조정 필요
+  if (y_original_color == RBTREE_BLACK) {
+    if (x != t -> nil) {
+      rbtree_erase_fixup(t, x); 
+    }
+  }
+
+  free(erase);
   return 0;
 }
 
@@ -296,7 +374,7 @@ void rbtree_erase_fixup(rbtree * t, node_t * x){
       if(sibling -> color == RBTREE_RED){
         sibling -> color = RBTREE_BLACK;
         x -> parent -> color = RBTREE_RED;
-        left_rotate(t, x -> parent);
+        left_rotation(t, x -> parent);
         sibling = x -> parent -> right;
       }
 
@@ -309,11 +387,11 @@ void rbtree_erase_fixup(rbtree * t, node_t * x){
       // 자식들 중 최소 한 개는 red      
       else {
 
-        // 만약 형제가 black, 왼쪽 자식이 red, 오른쪽 자식이 black일 경우
+        // 만약 형제가 black, 오른쪽 자식이 red, 왼쪽 자식이 black일 경우        
         if(sibling -> right -> color == RBTREE_BLACK){
-          sibling -> color = RBTREE_RED;
           sibling -> left -> color = RBTREE_BLACK;
-          right_rotate(t, sibling);
+          sibling -> color = RBTREE_RED;
+          right_rotation(t, sibling);
           sibling = x -> parent -> right;
         }
 
@@ -321,7 +399,7 @@ void rbtree_erase_fixup(rbtree * t, node_t * x){
         sibling -> color = x -> parent -> color;
         x -> parent -> color = RBTREE_BLACK;
         sibling -> right -> color = RBTREE_BLACK;
-        left_rotate(t, x -> parent);
+        left_rotation(t, x -> parent);
         x = t -> root;
       }
     }
@@ -334,7 +412,7 @@ void rbtree_erase_fixup(rbtree * t, node_t * x){
       if(sibling -> color == RBTREE_RED){
         sibling -> color = RBTREE_BLACK;
         x -> parent -> color = RBTREE_RED;
-        right_rotate(t, x -> parent);
+        right_rotation(t, x -> parent);
         sibling = x -> parent -> left;
       }
 
@@ -347,11 +425,11 @@ void rbtree_erase_fixup(rbtree * t, node_t * x){
       // 자식들 중 최소 한 개는 red      
       else {
 
-        // 만약 형제가 black, 오른쪽 자식이 red, 왼쪽 자식이 black일 경우        
+        // 만약 형제가 black, 왼쪽 자식이 red, 오른쪽 자식이 black일 경우
         if(sibling -> left -> color == RBTREE_BLACK){
-          sibling -> color = RBTREE_RED;
           sibling -> right -> color = RBTREE_BLACK;
-          left_rotate(t, sibling);
+          sibling -> color = RBTREE_RED;
+          left_rotation(t, sibling);
           sibling = x -> parent -> left;
         }
 
@@ -359,7 +437,7 @@ void rbtree_erase_fixup(rbtree * t, node_t * x){
         sibling -> color = x -> parent -> color;
         x->parent -> color = RBTREE_BLACK;
         sibling -> left -> color = RBTREE_BLACK;
-        right_rotate(t, x -> parent);
+        right_rotation(t, x -> parent);
         x = t -> root;
       }
     }
@@ -368,7 +446,20 @@ void rbtree_erase_fixup(rbtree * t, node_t * x){
   x -> color = RBTREE_BLACK;
 }
 
-int rbtree_to_array(const rbtree * t, key_t * arr, const size_t s) {
-  // TODO: implement to_array
+int node_to_array(const rbtree * t, node_t * n, key_t * arr, int i){
+  if (n == t -> nil) {
+    return i; 
+  }
+
+  i = node_to_array(t, n -> left, arr, i);   
+  arr[i++] = n -> key; 
+  i = node_to_array(t, n -> right, arr, i);  
+
+  return i;
+}
+
+int rbtree_to_array(const rbtree *t, key_t *arr, const size_t s) {
+  node_to_array(t, t -> root, arr, 0);
+
   return 0;
 }
