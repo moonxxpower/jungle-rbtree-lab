@@ -234,19 +234,34 @@ node_t * rbtree_find(const rbtree * t, const key_t key) {
     else {
       return temp;
     }
-
-    return NULL;
   }
+
+  return NULL;
 }
 
-node_t *rbtree_min(const rbtree *t) {
-  // TODO: implement find
-  return t->root;
+// RB Tree의 최소 값 찾기
+node_t * rbtree_min(const rbtree * t) {
+  node_t * p = t -> nil;
+  node_t * c = t -> root;
+
+  while (c != t -> nil) {
+    p = c;
+    c = c -> left;
+  }
+
+  return p;
 }
 
-node_t *rbtree_max(const rbtree *t) {
-  // TODO: implement find
-  return t->root;
+node_t * rbtree_max(const rbtree * t) {
+  node_t * p = t -> nil;
+  node_t * c = t -> root;
+
+  while (c != t -> nil) {
+    p = c;
+    c = c -> right;
+  }
+
+  return p;
 }
 
 int rbtree_erase(rbtree *t, node_t *p) {
