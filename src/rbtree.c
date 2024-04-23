@@ -252,6 +252,7 @@ node_t * rbtree_min(const rbtree * t) {
   return p;
 }
 
+// RB Tree의 최대 값 찾기
 node_t * rbtree_max(const rbtree * t) {
   node_t * p = t -> nil;
   node_t * c = t -> root;
@@ -264,14 +265,110 @@ node_t * rbtree_max(const rbtree * t) {
   return p;
 }
 
-int rbtree_erase(rbtree *t, node_t *p) {
-  // TODO: implement erase
+// n을 기준으로 최소 값을 갖는 노드
+node_t * node_min(rbtree * t, node_t * n) {
+  node_t * temp;
+  temp = n;
+
+  while (temp != t -> nil) {
+    temp = temp -> left;
+  }
+
+  return temp;
+}
+
+int rbtree_erase(rbtree *t, node_t * n) {
+
   return 0;
 }
 
-// rbtree_erase_fixup(rbtree *t, node_t *p)
+// 삭제 후, RB Tree 속성을 만족하지 않은 부분 재조정
+void rbtree_erase_fixup(rbtree * t, node_t * x){
+  node_t * sibling;
 
-int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
+  while(x != t -> root && x -> color == RBTREE_BLACK){
+
+    // 기준이 되는 노드가 왼쪽에 있을 때
+    if(x == x -> parent -> left){
+      sibling = x -> parent -> right;
+
+      // 만약 형제가 red일 경우
+      if(sibling -> color == RBTREE_RED){
+        sibling -> color = RBTREE_BLACK;
+        x -> parent -> color = RBTREE_RED;
+        left_rotate(t, x -> parent);
+        sibling = x -> parent -> right;
+      }
+
+      // 만약 형제와 형제의 자식들 모두 black일 경우
+      if(sibling -> left -> color == RBTREE_BLACK && sibling -> right -> color == RBTREE_BLACK){
+        sibling -> color = RBTREE_RED;
+        x = x -> parent;
+      }
+
+      // 자식들 중 최소 한 개는 red      
+      else {
+
+        // 만약 형제가 black, 왼쪽 자식이 red, 오른쪽 자식이 black일 경우
+        if(sibling -> right -> color == RBTREE_BLACK){
+          sibling -> color = RBTREE_RED;
+          sibling -> left -> color = RBTREE_BLACK;
+          right_rotate(t, sibling);
+          sibling = x -> parent -> right;
+        }
+
+        // 만약 형제는 black, 형제의 오른쪽 자식이 red일 경우
+        sibling -> color = x -> parent -> color;
+        x -> parent -> color = RBTREE_BLACK;
+        sibling -> right -> color = RBTREE_BLACK;
+        left_rotate(t, x -> parent);
+        x = t -> root;
+      }
+    }
+
+    // 기준이 되는 노드가 오른쪽에 있을 때
+    else{
+      sibling = x -> parent -> left;
+
+      //만약 형제가 red일 경우
+      if(sibling -> color == RBTREE_RED){
+        sibling -> color = RBTREE_BLACK;
+        x -> parent -> color = RBTREE_RED;
+        right_rotate(t, x -> parent);
+        sibling = x -> parent -> left;
+      }
+
+      // 만약 형제와 형제의 자식들 모두 black일 경우
+      if(sibling -> right -> color == RBTREE_BLACK && sibling -> left -> color == RBTREE_BLACK){
+        sibling -> color = RBTREE_RED;
+        x = x -> parent;
+      }
+
+      // 자식들 중 최소 한 개는 red      
+      else {
+
+        // 만약 형제가 black, 오른쪽 자식이 red, 왼쪽 자식이 black일 경우        
+        if(sibling -> left -> color == RBTREE_BLACK){
+          sibling -> color = RBTREE_RED;
+          sibling -> right -> color = RBTREE_BLACK;
+          left_rotate(t, sibling);
+          sibling = x -> parent -> left;
+        }
+
+        // 만약 형제는 black, 형제의 왼쪽 자식이 red일 경우
+        sibling -> color = x -> parent -> color;
+        x->parent -> color = RBTREE_BLACK;
+        sibling -> left -> color = RBTREE_BLACK;
+        right_rotate(t, x -> parent);
+        x = t -> root;
+      }
+    }
+  }
+
+  x -> color = RBTREE_BLACK;
+}
+
+int rbtree_to_array(const rbtree * t, key_t * arr, const size_t s) {
   // TODO: implement to_array
   return 0;
 }
