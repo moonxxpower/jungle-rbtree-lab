@@ -97,8 +97,20 @@ void right_rotation(rbtree *t, node_t *y) {
   y -> parent = x;
 }
 
+// 후위 순회를 이용하여 해당 Tree가 사용했던 메모리 전부 반환
+void delete_node(rbtree *t, node_t *n) {
+  if (n == t -> nil) {
+    return;
+  }
+
+  delete_node(t, n -> left);
+  delete_node(t, n -> right);
+  free(n);
+}
+
 void delete_rbtree(rbtree *t) {
-  // TODO: reclaim the tree nodes's memory
+  delete_node(t, t -> root);
+  free(t -> nil);
   free(t);
 }
 
@@ -132,7 +144,7 @@ node_t *rbtree_insert(rbtree *t, const key_t key) {
   else if (key < p -> key) {
     p -> left = new;
   }
-  
+
   else {
     p -> right = new;
   }
@@ -231,4 +243,3 @@ int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
   // TODO: implement to_array
   return 0;
 }
-
