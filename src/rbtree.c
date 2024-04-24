@@ -434,11 +434,13 @@ void rbtree_erase_fixup(rbtree * t, node_t * x) {
   x -> color = RBTREE_BLACK;
 }
 
+// 중위 순회하면서 값을 array에 담기
 int node_to_array(const rbtree * t, node_t * n, key_t * arr, int i){
   if (n == t -> nil) {
     return i; 
   }
 
+  // i는 인덱스
   i = node_to_array(t, n -> left, arr, i);   
   arr[i++] = n -> key; 
   i = node_to_array(t, n -> right, arr, i);  
@@ -446,6 +448,7 @@ int node_to_array(const rbtree * t, node_t * n, key_t * arr, int i){
   return i;
 }
 
+// RB Tree의 내용을 key 순서대로 array로 반환
 int rbtree_to_array(const rbtree *t, key_t *arr, const size_t s) {
   node_to_array(t, t -> root, arr, 0);
 
@@ -454,18 +457,18 @@ int rbtree_to_array(const rbtree *t, key_t *arr, const size_t s) {
 
 // // 트리를 출력하는 함수
 // void print_rbtree(rbtree *t, node_t *node, int space) {
-//   if (node == t->nil)
+//   if (node == t -> nil)
 //     return;
 
 //   space += 10;
-//   print_rbtree(t, node->right, space);
+//   print_rbtree(t, node -> right, space);
 
 //   printf("\n");
 //   for (int i = 10; i < space; i++)
 //     printf(" ");
-//   printf("[%d(%s)]\n", node->key, node->color == RBTREE_RED ? "R" : "B");
+//   printf("[%d(%s)]\n", node -> key, node -> color == RBTREE_RED ? "R" : "B");
 
-//   print_rbtree(t, node->left, space);
+//   print_rbtree(t, node -> left, space);
 // }
 
 // int main() {
@@ -475,7 +478,7 @@ int rbtree_to_array(const rbtree *t, key_t *arr, const size_t s) {
 //   printf("노드를 삽입하려면 키 값을 입력하세요 (음수를 입력하면 종료):\n");
 //   while (scanf("%d", &key) && key >= 0) {
 //     rbtree_insert(t, key);
-//     print_rbtree(t, t->root, 0);
+//     print_rbtree(t, t -> root, 0);
 //   }
 
 //   printf("삭제할 값을 입력하세요:\n");
@@ -484,7 +487,7 @@ int rbtree_to_array(const rbtree *t, key_t *arr, const size_t s) {
 //     if (to_delete) {
 //       rbtree_erase(t, to_delete);
 //       printf("%d가 트리에서 삭제되었습니다.\n", key);
-//       print_rbtree(t, t->root, 0);
+//       print_rbtree(t, t -> root, 0);
 //     } else {
 //       printf("%d가 트리에 존재하지 않습니다.\n", key);
 //     }
